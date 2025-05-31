@@ -1,34 +1,36 @@
-import React, { useState } from "react";
-import {v1 as uuid} from "uuid";
-import axios from "axios";
+// src/PlayingCardList.js
+import React from "react";
 import PlayingCard from "./PlayingCard";
-import "./PlayingCardList.css";
+import { useAxios } from "./hooks";
 
-/* Renders a list of playing cards.
- * Can also add a new card at random. */
-function CardTable() {
-  const [cards, setCards] = useState([]);
-  const addCard = async () => {
-    const response = await axios.get(
-      "https://deckofcardsapi.com/api/deck/new/draw/"
-    );
-    setCards(cards => [...cards, { ...response.data, id: uuid() }]);
-  };
+const BASE_URL = "https://deckofcardsapi.com/api/deck/new/draw/?count=1";
+
+function PlayingCardList() {
+  // pull array + helper straight from the hook
+  const [cards, addCard] = useAxios(
+    BASE_URL,
+    data => data.cards[0]
+  );
+
+
   return (
     <div className="PlayingCardList">
-      <h3>Pick a card, any card!</h3>
-      <div>
-        <button onClick={addCard}>Add a playing card!</button>
-      </div>
+      <h3>Pick a card (or a few)!</h3>
+
+      {/* add-card button */}
+      <button onClick={() => addCard()}>Add a playing card!</button>
+
+      {/* render everything we’ve drawn */}
       <div className="PlayingCardList-card-area">
-        {cards.map(cardData => (
-          <PlayingCard key={cardData.id} front={cardData.cards[0].image} />
+        {cards.map(card => (
+          <PlayingCard
+            key={card.code}        // e.g. "5S"
+            image={card.image}      // front-of-card URL
+          />
         ))}
       </div>
     </div>
   );
 }
 
-CardTable.defaultProps = {};
-
-export default CardTable;
+export default PlayingCardList;

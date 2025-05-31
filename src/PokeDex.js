@@ -4,35 +4,40 @@ import axios from "axios";
 import PokemonSelect from "./PokemonSelect";
 import PokemonCard from "./PokemonCard";
 import "./PokeDex.css";
+import { useAxios } from "./hooks";
 
+const BASE_URL = "https://pokeapi.co/api/v2/pokemon/";
 /* Renders a list of pokemon cards.
  * Can also add a new card at random,
  * or from a dropdown of available pokemon. */
 function PokeDex() {
-  const [pokemon, setPokemon] = useState([]);
-  const addPokemon = async name => {
-    const response = await axios.get(
-      `https://pokeapi.co/api/v2/pokemon/${name}/`
-    );
-    setPokemon(pokemon => [...pokemon, { ...response.data, id: uuid() }]);
+  const [pokemon, addPokemon] = useAxios(BASE_URL);
+
+  /** prompt for a name and fetch that Pokémon */
+  const handleAdd = async () => {
+    const name = prompt("Enter a Pokémon name:");
+    if (name) await addPokemon(name.toLowerCase().trim());
   };
+
   return (
     <div className="PokeDex">
-      <div className="PokeDex-buttons">
-        <h3>Please select your pokemon:</h3>
-        <PokemonSelect add={addPokemon} />
-      </div>
+      <h3>Find a Pokémon!</h3>
+      <button onClick={handleAdd}>Add Pokémon</button>
+
       <div className="PokeDex-card-area">
-        {pokemon.map(cardData => (
+        {pokemon.map(p => (
           <PokemonCard
-            key={cardData.id}
-            front={cardData.sprites.front_default}
-            back={cardData.sprites.back_default}
-            name={cardData.name}
-            stats={cardData.stats.map(stat => ({
-              value: stat.base_stat,
-              name: stat.stat.name
+            key={p.id}
+            name={p.name}
+            front={p.sprites.front_default}
+            back={p.sprites.back_default}
+            stats={p.stats
+              .filter(s => s && s.stat && s.stat.name)       // toss out junk / undefined
+              .map(({ stat, base_stat }) => ({
+              name:  stat.name,
+              value: base_stat
             }))}
+            
           />
         ))}
       </div>

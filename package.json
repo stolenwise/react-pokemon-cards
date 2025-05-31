@@ -9,7 +9,7 @@
     "axios": "*",
     "react": "*",
     "react-dom": "*",
-    "react-scripts": "*",
+    "react-scripts": "^5.0.1",
     "uuid": "*"
   },
   "scripts": {
